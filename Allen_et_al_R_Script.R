@@ -92,10 +92,10 @@ colnames(track2) = c("input", "filtered", "denoised", "merged", "tabled", "nonch
 rownames(track2) = sample.names
 View(track2)
 
-##Assign taxonomy; GreenGenes version 13.8 (August, 2013) - not 97% similarity, not 99%
+##Assign taxonomy; SILVA v132
 silva.taxa3 = assignTaxonomy(seqtab2.nochim, "~/geotraces-exp/Geotraces_exp_unzipped/silva_nr_v132_train_set.fa", multithread = T)
 
-##Species level assignment from RDP - not applied
+##Species level assignment 
 silva.taxa3 <- addSpecies(silva.taxa3, "~/geotraces-exp/Geotraces_exp_unzipped/silva_species_assignment_v132.fa")
 
 ##View taxonomic assignments
@@ -111,7 +111,7 @@ library(DECIPHER)
 library(phangorn)
 
 seqs = getSequences(seqtab2.nochim)
-names(seqs) = seqs #This propagates to the tip labels of the tree.
+names(seqs) = seqs 
 alignment = AlignSeqs(DNAStringSet(seqs), anchor = NA)
 ?plotBS
 ?optim.pml
@@ -154,6 +154,7 @@ head(asv.names)
 taxa_names(geo.exp) = asv.names$asv.names
 taxa_names(geo.exp)
 View(tax_table(geo.exp))
+
 ##Root phylogenetic tree 
 pick_new_outgroup <- function(tree.unrooted){
   require("magrittr")
