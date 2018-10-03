@@ -184,7 +184,7 @@ min(rowSums(otu_table(geo.exp)))
 max(rowSums(otu_table(geo.exp)))
 
 ##Add sample codes
-sample.code = as.vector(c("Err","CT_D1_A3", "CT_D1_B3", "CT_D1_C3", "OA_D1_A3", "OA_D1_B3", "GH_D1_A3", "GH_D1_B3", "GH_D1_C3", "CT_D5_A3", "CT_D5_B3", "CT_D5_C3", "OA_D5_A3", "OA_D5_B3", "OA_D5_C3", "GH_D5_A3", "GH_D5_B3", "GH_D5_C3", "CT_D1_A1", "CT_D5_A1", "CT_D5_B1", "CT_D5_C1", "OA_D5_A1", "OA_D5_B1", "OA_D5_C1", "GH_D5_A1", "Err", "GH_D5_C1", "CT_D1_B1", "CT_D1_C1", "OA_D1_A1", "OA_D1_B1", "OA_D1_C1", "GH_D1_A1", "GH_D1_B1", "GH_D1_C1"))
+sample.code = as.vector(c("Technical","CT_D1_A3", "CT_D1_B3", "CT_D1_C3", "OA_D1_A3", "OA_D1_B3", "GH_D1_A3", "GH_D1_B3", "GH_D1_C3", "CT_D5_A3", "CT_D5_B3", "CT_D5_C3", "OA_D5_A3", "OA_D5_B3", "OA_D5_C3", "GH_D5_A3", "GH_D5_B3", "GH_D5_C3", "CT_D1_A1", "CT_D5_A1", "CT_D5_B1", "CT_D5_C1", "OA_D5_A1", "OA_D5_B1", "OA_D5_C1", "GH_D5_A1", "Err", "GH_D5_C1", "CT_D1_B1", "CT_D1_C1", "OA_D1_A1", "OA_D1_B1", "OA_D1_C1", "GH_D1_A1", "GH_D1_B1", "GH_D1_C1"))
 sample_data(geo.exp)$sample.code = sample.code
 
 ##Restructuring tax_table to include 'best' classification
@@ -216,7 +216,7 @@ identical(bc.tax[1:1937,1:7], tax_table(geo.exp))
 tax_table(geo.exp) = bc.tax
 View(tax_table(geo.exp))
 
-##Remove bacterial and chloroplast sequences
+##Remove non-bacterial and chloroplast sequences
 gg.x = subset_taxa(geo.exp, Kingdom == "Bacteria")
 gg.x = subset_taxa(gg.x, Order != "Chloroplast")
 
@@ -225,7 +225,7 @@ gg.x.3 = subset_samples(gg.x, Experiment == "E3")
 gg.x.3 = filter_taxa(gg.x.3, function(x) sum(x > 5) > (0.1*length(x)), TRUE)
 
 gg.x.1 = subset_samples(gg.x, Experiment == "E1")
-#Note here we are dropping the phosphate spiked G2 bottle from Day 1 as well, which we had failed to do initially. 
+#remove RLM8 (phosphate contaminated bottle Day 1)
 gg.x.1 = subset_samples(gg.x.1, SampleID != "RLM8")
 gg.x.1 = filter_taxa(gg.x.1, function(x) sum(x > 5) > (0.1*length(x)), TRUE)
 
@@ -283,24 +283,6 @@ rx3.5.metadata = as(sample_data(rx3.5), "data.frame")
 rx3.5.dist = phyloseq::distance(rx3.5, "wunifrac")
 adonis(rx3.5.dist ~ Treatment, data = rx3.5.metadata, permutations = 9999) 
 
-##PERMANOVA on bray 
-rx1.1.metadata = as(sample_data(rx1.1), "data.frame")
-rx1.1.dist.b = phyloseq::distance(rx1.1, "bray")
-adonis(rx1.1.dist.b ~ Treatment, data = rx1.1.metadata, permutations = 9999) 
-
-rx1.5.metadata = as(sample_data(rx1.5), "data.frame")
-rx1.5.dist.b = phyloseq::distance(rx1.5, "bray")
-adonis(rx1.5.dist.b ~ Treatment, data = rx1.5.metadata, permutations = 9999) 
-
-rx3.1.metadata = as(sample_data(rx3.1), "data.frame")
-rx3.1.dist.b = phyloseq::distance(rx3.1, "bray")
-adonis(rx3.1.dist.b ~ Treatment, data = rx3.1.metadata, permutations = 9999) 
-
-rx3.5.metadata = as(sample_data(rx3.5), "data.frame")
-rx3.5.dist.b = phyloseq::distance(rx3.5, "bray")
-adonis(rx3.5.dist.b ~ Treatment, data = rx3.5.metadata, permutations = 9999) 
-
-
 ##Betadispersal (Homogeneity of dispersal) analysis
 rx1.1.beta = betadisper(rx1.1.dist, rx1.1.metadata$Treatment, sqrt.dist = FALSE) 
 permutest(rx1.1.beta, pairwise = T, permutations = 9999)
@@ -320,12 +302,6 @@ o.rx1.5 = ordinate(rx1.5, method = "PCoA", distance = "wunifrac")
 o.rx3.1 = ordinate(rx3.1, method = "PCoA", distance = "wunifrac")
 o.rx3.5 = ordinate(rx3.5, method = "PCoA", distance = "wunifrac")
 
-b.rx1.1 = ordinate(rx1.1, method = "PCoA", distance = "bray")
-b.rx1.5 = ordinate(rx1.5, method = "PCoA", distance = "bray")
-b.rx3.1 = ordinate(rx3.1, method = "PCoA", distance = "bray")
-b.rx3.5 = ordinate(rx3.5, method = "PCoA", distance = "bray")
-
-
 ##Plotting results
 sample_data(rx1.1)$Treatment = factor(sample_data(rx1.1)$Treatment, levels = c("Control", "OA", "Greenhouse"))
 sample_data(rx1.5)$Treatment = factor(sample_data(rx1.5)$Treatment, levels = c("Control", "OA", "Greenhouse"))
@@ -340,12 +316,3 @@ new.pcoa.3.t5 = plot_ordination(rx3.5, o.rx3.5, type = "sites", color = "Treatme
 
 new.p1 = plot_grid(new.pcoa.1.t0, new.pcoa.1.t5, new.pcoa.3.t0, new.pcoa.3.t5, ncol = 2, labels = "AUTO")
 save_plot("silva.new.pcoa.quadplot.png", new.p1, base_width = 7, base_height = 6)
-
-#bray
-b.pcoa.1.t0 = plot_ordination(rx1.1, b.rx1.1, type = "sites", color = "Treatment") + theme_bw() + geom_point(size = 4, colour = "black") + geom_point(size = 3.5) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = "none") + scale_color_manual(values = c("white", "grey", "black"))
-b.pcoa.1.t5 = plot_ordination(rx1.5, b.rx1.5, type = "sites", color = "Treatment") + theme_bw() + geom_point(size = 4, colour = "black") + geom_point(size = 3.5) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = "none") + scale_color_manual(values = c("white", "grey", "black"))
-b.pcoa.3.t0 = plot_ordination(rx3.1, b.rx3.1, type = "sites", color = "Treatment") + theme_bw() + geom_point(size = 4, colour = "black") + geom_point(size = 3.5) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = "none") + scale_color_manual(values = c("white", "grey", "black"))
-b.pcoa.3.t5 = plot_ordination(rx3.5, b.rx3.5, type = "sites", color = "Treatment") + theme_bw() + geom_point(size = 4, colour = "black") + geom_point(size = 3.5) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = "none") + scale_color_manual(values = c("white", "grey", "black"))
-
-b.p1 = plot_grid(b.pcoa.1.t0, b.pcoa.1.t5, b.pcoa.3.t0, b.pcoa.3.t5, ncol = 2, labels = "AUTO")
-save_plot("silva.bray.pcoa.quadplot.png", b.p1, base_width = 7, base_height = 6)
